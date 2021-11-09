@@ -39,15 +39,13 @@ class Todo(Resource):
         }, 200
 
     def delete(self, todo_id):
-        todo_id = int(todo_id)
+        task = Task.query.get(todo_id)
+        if task:
+            db.session.delete(task)
+            db.session.commit()
+            return {"message": f"Task {todo_id} {task.name} DELETED"}, 200
 
-        task_to_delete = Task.query.get(todo_id)
-        if task_to_delete:
-            Task.query.session.delete(task_to_delete)
-            Task.query.session.commit()
-            return {"message": f"task {task_to_delete.name} deleted"}
-
-        return {"error": f"could not find task {todo_id}"}, 404
+        return {"error": f"Could not find task {todo_id}"}, 404
 
 
 class TodoList(Resource):
