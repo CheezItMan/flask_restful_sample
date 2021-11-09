@@ -2,31 +2,23 @@ from flask_restful import Resource
 from flask import request
 from models.task import Task
 
-TASKS = [
-    {
-        "id": 1,
-        "name": "clean room"
-    },
-    {
-        "id": 2,
-        "name": "clean up open tabs"
-    },
-    {
-        "id": 3,
-        "name": "return library books"
-    }
-]
-
 
 class Todo(Resource):
-    def __init__(self):
-        self.tasks = TASKS
 
+    # route for GET '/todo/<todo_id>'
     def get(self, todo_id):
-        for task in self.tasks:
-            if task["id"] == int(todo_id):
-                return task, 200
-        return {"error": f"could not find task {todo_id}"}, 404
+
+        todo_id = int(todo_id)
+        task = Task.query.get(todo_id)
+        if not task:
+            return {"error": f"Could not find task {todo_id}"}, 404
+
+        return {
+            "todo": {
+                "id": task.id,
+                "name": task.name,
+            }
+        }, 200
 
     def put(self, todo_id):
         body = request.get_json()
