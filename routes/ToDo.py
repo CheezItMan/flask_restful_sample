@@ -1,6 +1,7 @@
 from flask_restful import Resource
 from flask import request
 from models.task import Task
+from app import db
 
 
 class Todo(Resource):
@@ -20,17 +21,22 @@ class Todo(Resource):
             }
         }, 200
 
+    # put /todo/<todo_id>
     def put(self, todo_id):
         body = request.get_json()
         print(body)
-        for task in self.tasks:
-            if task["id"] == int(todo_id):
-                task = {
-                    "id": todo_id,
-                    "name": body["name"]
-                }
-                return task
-        return {"error": f"could not find task {todo_id}"}, 404
+        task = Task.query.get(todo_id)
+        if not task:
+            return {"error": f"Could not find task {todo_id}"}, 404
+
+        task.name = body["name"]
+        db.session.commit()
+        return {
+            "todo": {
+                "id": task.id,
+                "name": task.name,
+            }
+        }, 200
 
     def delete(self, todo_id):
         todo_id = int(todo_id)
